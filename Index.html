@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Switchboard</title>
+<style>
+body { background: #0f0f0f; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
+.container { text-align: center; width: 100%; }
+.btn { width: 140px; height: 140px; border-radius: 50%; border: none; background: #1a1a1a; color: #fff; font-size: 50px; margin: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: 0.2s; -webkit-tap-highlight-color: transparent; }
+.btn:active { transform: scale(0.95); background: #333; }
+.mic-active { background: #e91e63 !important; box-shadow: 0 0 20px #e91e63; }
+.status-text { font-size: 14px; color: #888; letter-spacing: 1px; text-transform: uppercase; margin-top: 10px; }
+#camera-input { display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+<input type="file" id="camera-input" accept="image/*" capture="environment">
+<button class="btn" id="camBtn">📸</button>
+<button class="btn" id="micBtn">🎙️</button>
+<div class="status-text" id="status">System Standby</div>
+</div>
+
+<script>
+const BOT_TOKEN = "8518289342:AAH3mwdWmdU38Ii6jzESWPDwbD4lg3_FUnc";
+const CHAT_ID = "724906751";
+
+const status = document.getElementById('status');
+const camBtn = document.getElementById('camBtn');
+const micBtn = document.getElementById('micBtn');
+const camInput = document.getElementById('camera-input');
+
+// Photo Action
+camBtn.onclick = () => camInput.click();
+camInput.onchange = async (e) => {
+const file = e.target.files[0];
+if (!file) return;
+status.innerText = "Analyzing Image...";
+
+const formData = new FormData();
+formData.append('chat_id', CHAT_ID);
+formData.append('photo', file);
+
+await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
+status.innerText = "Sent to Brain";
+setTimeout(() => status.innerText = "System Standby", 2000);
+};
+
+// Simple Voice Placeholder (Sends text "Voice Command" for now)
+micBtn.onclick = async () => {
+micBtn.classList.add('mic-active');
+status.innerText = "Listening...";
+
+// In a full build, we'd record audio here. For the prototype:
+setTimeout(async () => {
+await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ chat_id: CHAT_ID, text: "🎤 [Voice Command Triggered]" })
+});
+micBtn.classList.remove('mic-active');
+status.innerText = "Processing...";
+setTimeout(() => status.innerText = "System Standby", 2000);
+}, 2000);
+};
+</script>
+</body>
+</html>
